@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\BookRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -46,6 +48,16 @@ class Book
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $imgurl;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Orderdetail::class, mappedBy="bookid")
+     */
+    private $orderdetails;
+
+    public function __construct()
+    {
+        $this->orderdetails = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -120,6 +132,36 @@ class Book
     public function setImgurl(?string $imgurl): self
     {
         $this->imgurl = $imgurl;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Orderdetail>
+     */
+    public function getOrderdetails(): Collection
+    {
+        return $this->orderdetails;
+    }
+
+    public function addOrderdetail(Orderdetail $orderdetail): self
+    {
+        if (!$this->orderdetails->contains($orderdetail)) {
+            $this->orderdetails[] = $orderdetail;
+            $orderdetail->setBookid($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrderdetail(Orderdetail $orderdetail): self
+    {
+        if ($this->orderdetails->removeElement($orderdetail)) {
+            // set the owning side to null (unless already changed)
+            if ($orderdetail->getBookid() === $this) {
+                $orderdetail->setBookid(null);
+            }
+        }
 
         return $this;
     }
